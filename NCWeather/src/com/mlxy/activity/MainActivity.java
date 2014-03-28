@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.mlxy.ncweather.R;
 import com.mlxy.xml.XmlDownloader;
+import com.mlxy.xml.XmlFile;
 import com.mlxy.xml.XmlParser;
 
 public class MainActivity extends Activity {
@@ -59,13 +60,8 @@ public class MainActivity extends Activity {
 					.setDay(0)
 					.download();
 			
-			// 获取外部存储路径并取得文件对象。
-			File externalDirectory = Environment.getExternalStorageDirectory();
-			String fileName = "xml_resource.xml";
-			File file = new File(externalDirectory, fileName);
-			
 			// 实例化解析器并解析数据。
-			XmlParser parser = new XmlParser(MainActivity.this, file);
+			XmlParser parser = new XmlParser(MainActivity.this, XmlFile.getFile());
 			weatherString = parser.getWeather();
 			temperatureString = parser.getTemperature();
 			
