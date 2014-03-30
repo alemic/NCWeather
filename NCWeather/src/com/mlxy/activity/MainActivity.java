@@ -1,10 +1,13 @@
 package com.mlxy.activity;
 
+import java.util.Map;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -12,8 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mlxy.ncweather.R;
+import com.mlxy.property.WeatherTag;
 import com.mlxy.xml.XmlDownloader;
-import com.mlxy.xml.XmlFile;
 import com.mlxy.xml.XmlParser;
 
 public class MainActivity extends Activity {
@@ -60,7 +63,7 @@ public class MainActivity extends Activity {
 	/** 单独开启一个线程，访问网络获取xml文件并处理。*/
 	class UpdateInfo implements Runnable {
 		@Override
-		public synchronized void run() {
+		public void run() {
 			// 构建Xml下载器并下载Xml文件。
 			new XmlDownloader.Builder(MainActivity.this)
 					.setCity("南昌")
@@ -68,16 +71,30 @@ public class MainActivity extends Activity {
 					.setDay(0)
 					.download();
 			
-			// 实例化解析器并解析数据。
-			XmlParser parser = new XmlParser(MainActivity.this, XmlFile.getFile());
-			weatherString = parser.getWeather();
-			temperatureString = parser.getTemperature();
 			
+			// 实例化解析器并解析数据。
+			XmlParser parser = new XmlParser(MainActivity.this);
+			Map<String, String> map = null;
 			try {
-				updateTime = parser.getUpdateTime();
+				map = parser.getContentsByTags(WeatherTag.DAY_WEATHER, 
+										 	   WeatherTag.NIGHT_WEATHER, 
+										 	   WeatherTag.DAY_TEMPERATURE,
+										 	   WeatherTag.NIGHT_TEMPERATURE);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			Log.v("mlxy", map.size() + "");
+			weatherString = map.get(WeatherTag.DAY_WEATHER);
+			temperatureString = map.get(WeatherTag.DAY_TEMPERATURE);
+			
+//			try {
+//				weatherString = parser.getContentByTag(WeatherTag.DAY_WEATHER);
+//				temperatureString = parser.getContentByTag(WeatherTag.DAY_TEMPERATURE);
+//				updateTime = parser.getContentByTag(WeatherTag.SAVEDATE_WEATHER);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 			
 			handler.sendEmptyMessage(0x123);
 		}

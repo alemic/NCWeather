@@ -1,4 +1,4 @@
-package com.mlxy.info;
+package com.mlxy.property;
 
 /** API内包含的标签。*/
 public class WeatherTag {

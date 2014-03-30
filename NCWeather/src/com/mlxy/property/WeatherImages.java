@@ -1,4 +1,4 @@
-package com.mlxy.info;
+package com.mlxy.property;
 
 public class WeatherImages {
 	
