@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,8 +17,10 @@ import com.mlxy.xml.XmlFile;
 import com.mlxy.xml.XmlParser;
 
 public class MainActivity extends Activity {
-	TextView weather;
-	TextView temperature;
+	TextView weatherText;
+	TextView temperatureText;
+	Button updateButton;
+	
 	String weatherString = "";
 	String temperatureString = "";
 	String updateTime = "";
@@ -27,8 +32,8 @@ public class MainActivity extends Activity {
 			super.handleMessage(msg);
 			
 			if (msg.what == 0x123) {
-				MainActivity.this.weather.setText(weatherString);
-				MainActivity.this.temperature.setText(temperatureString);
+				MainActivity.this.weatherText.setText(weatherString);
+				MainActivity.this.temperatureText.setText(temperatureString);
 				
 				Toast.makeText(MainActivity.this, updateTime, Toast.LENGTH_LONG).show();
 			}
@@ -40,16 +45,22 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		weather = (TextView) findViewById(R.id.text_weather);
-		temperature = (TextView) findViewById(R.id.text_temperature);
+		weatherText = (TextView) findViewById(R.id.text_weather);
+		temperatureText = (TextView) findViewById(R.id.text_temperature);
+		updateButton = (Button) findViewById(R.id.button1);
 		
-		new Thread(new XmlInitThread()).start();
+		updateButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				new Thread(new UpdateInfo()).start();
+			}
+		});
 	}
 	
 	/** 单独开启一个线程，访问网络获取xml文件并处理。*/
-	class XmlInitThread implements Runnable {
+	class UpdateInfo implements Runnable {
 		@Override
-		public void run() {
+		public synchronized void run() {
 			// 构建Xml下载器并下载Xml文件。
 			new XmlDownloader.Builder(MainActivity.this)
 					.setCity("南昌")
