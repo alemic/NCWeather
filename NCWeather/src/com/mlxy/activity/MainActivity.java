@@ -7,10 +7,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.util.DisplayMetrics;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,13 +17,16 @@ import com.mlxy.xml.XmlDownloader;
 import com.mlxy.xml.XmlParser;
 
 public class MainActivity extends Activity {
+	TextView cityText;
+	TextView currentTemperatureText;
 	TextView weatherText;
 	TextView temperatureText;
-	Button updateButton;
 	
+	String cityString = "";
+	String currentTemperatureString = "";
 	String weatherString = "";
 	String temperatureString = "";
-	String updateTime = "";
+	String updateTimeString = "";
 	
 	@SuppressLint("HandlerLeak")
 	private Handler handler = new Handler() {
@@ -35,10 +35,12 @@ public class MainActivity extends Activity {
 			super.handleMessage(msg);
 			
 			if (msg.what == 0x123) {
+				MainActivity.this.cityText.setText(cityString);
 				MainActivity.this.weatherText.setText(weatherString);
+				MainActivity.this.currentTemperatureText.setText(currentTemperatureString);
 				MainActivity.this.temperatureText.setText(temperatureString);
 				
-				Toast.makeText(MainActivity.this, updateTime, Toast.LENGTH_LONG).show();
+				Toast.makeText(MainActivity.this, updateTimeString, Toast.LENGTH_LONG).show();
 			}
 		}
 	};
@@ -48,20 +50,35 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		weatherText = (TextView) findViewById(R.id.text_weather);
-		temperatureText = (TextView) findViewById(R.id.text_temperature);
-		updateButton = (Button) findViewById(R.id.button1);
+		cityText = (TextView) findViewById(R.id.textCity);
+		currentTemperatureText = (TextView) findViewById(R.id.textCurrentTemperature);
+		weatherText = (TextView) findViewById(R.id.textWeather);
+		temperatureText = (TextView) findViewById(R.id.textTemperature);
 		
-		updateButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				new Thread(new UpdateInfo()).start();
-			}
-		});
+		DisplayMetrics dm = this.getResources().getDisplayMetrics();
+		int textSize;
+		textSize = (int) (20 * dm.density);
+		cityText.setTextSize(textSize);
+		textSize = (int) (30 * dm.density);
+		currentTemperatureText.setTextSize(textSize);
+		textSize = (int) (15 * dm.density);
+		weatherText.setTextSize(textSize);
+		textSize = (int) (10 * dm.density);
+		temperatureText.setTextSize(textSize);
+		
+		Thread download = new Thread(new DownloadXml());
+		try {
+			download.start();
+			download.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		};
+		
+		new Thread(new UpdateInfo()).start();
 	}
 	
-	/** 单独开启一个线程，访问网络获取xml文件并处理。*/
-	class UpdateInfo implements Runnable {
+	/** 下载XML文件的线程。*/
+	class DownloadXml implements Runnable {
 		@Override
 		public void run() {
 			// 构建Xml下载器并下载Xml文件。
@@ -70,8 +87,13 @@ public class MainActivity extends Activity {
 					.setPassword("DJOYnieT8234jlsK")
 					.setDay(0)
 					.download();
-			
-			
+		}
+	}
+	
+	/** 解析XML文件的线程。*/
+	class UpdateInfo implements Runnable {
+		@Override
+		public void run() {
 			// 实例化解析器并解析数据。
 			XmlParser parser = new XmlParser(MainActivity.this);
 			Map<String, String> map = null;
@@ -79,22 +101,23 @@ public class MainActivity extends Activity {
 				map = parser.getContentsByTags(WeatherTag.DAY_WEATHER, 
 										 	   WeatherTag.NIGHT_WEATHER, 
 										 	   WeatherTag.DAY_TEMPERATURE,
-										 	   WeatherTag.NIGHT_TEMPERATURE);
+										 	   WeatherTag.NIGHT_TEMPERATURE,
+										 	   WeatherTag.CITY,
+										 	   WeatherTag.DAY_SENDIBLE_TEMPERATURE);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
-			Log.v("mlxy", map.size() + "");
-			weatherString = map.get(WeatherTag.DAY_WEATHER);
-			temperatureString = map.get(WeatherTag.DAY_TEMPERATURE);
-			
-//			try {
-//				weatherString = parser.getContentByTag(WeatherTag.DAY_WEATHER);
-//				temperatureString = parser.getContentByTag(WeatherTag.DAY_TEMPERATURE);
-//				updateTime = parser.getContentByTag(WeatherTag.SAVEDATE_WEATHER);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
+			// 获取各个字符串。
+			cityString = map.get(WeatherTag.CITY);
+			currentTemperatureString = map.get(WeatherTag.DAY_SENDIBLE_TEMPERATURE) + "℃";
+			temperatureString = map.get(WeatherTag.NIGHT_TEMPERATURE) + "-" + map.get(WeatherTag.DAY_TEMPERATURE) + "℃";
+			if (map.get(WeatherTag.DAY_WEATHER).equals(map.get(WeatherTag.NIGHT_WEATHER))) {
+				weatherString = map.get(WeatherTag.DAY_WEATHER);
+			} else {
+				weatherString = map.get(WeatherTag.DAY_WEATHER) + "转" + map.get(WeatherTag.NIGHT_WEATHER);
+			}
+			updateTimeString = parser.getUpdateTime();
 			
 			handler.sendEmptyMessage(0x123);
 		}

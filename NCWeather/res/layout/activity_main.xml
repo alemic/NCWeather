@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/LinearLayout2"
+    android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -11,58 +11,68 @@
     tools:context=".MainActivity" >
 
     <LinearLayout
-        android:gravity="bottom"
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="0dp" >
-
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:text="今日南昌天气："
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <TextView
-            android:id="@+id/text_weather"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:layout_weight="1" >
 
-        <TextView
-            android:id="@+id/textView2"
+        <RelativeLayout
+            android:id="@+id/RelativeLayout1"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="right"
-            android:text="气温："
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/text_temperature"
+            <TextView
+                android:id="@+id/textCity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/city" />
+
+            <TextView
+                android:id="@+id/textCurrentTemperature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/textCity"
+                android:text="@string/current_temperature" />
+
+            <TextView
+                android:id="@+id/textWeather"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/textCurrentTemperature"
+                android:text="@string/weather"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever" />
+
+            <TextView
+                android:id="@+id/textTemperature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/textWeather"
+                android:text="@string/temperature" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/imageView1"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
+            android:contentDescription="@string/image_description"
+            android:scaleType="fitStart"
+            android:src="@drawable/we" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="fill_parent"
+    <TableRow
+        android:id="@+id/tableRow1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="更新信息" />
+        android:layout_weight="1" >
+    </TableRow>
 
 </LinearLayout>
