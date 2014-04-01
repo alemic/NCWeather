@@ -8,5 +8,10 @@
     <string name="weather">天气未知</string>
     <string name="temperature">温度未知</string>
     <string name="current_temperature">温度未知</string>
+    <string name="fragment1">温度</string>
+    <string name="fragment2">污染</string>
+    <string name="fragment3">穿衣</string>
+    <string name="fragment4">感冒</string>
+    <string name="fragment5">运动</string>
 
 </resources>

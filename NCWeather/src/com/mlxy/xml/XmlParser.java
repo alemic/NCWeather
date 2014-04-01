@@ -23,8 +23,7 @@ public class XmlParser {
 	/**
 	 * 根据对应的标签检索标签内的内容。
 	 * 
-	 * @param tag
-	 *            节点名称
+	 * @param tag 节点名称
 	 * @return 返回标签内容，如果没有找到对应标签就返回空白字符。
 	 */
 	public String getContentByTag(String tag) throws Exception {
@@ -39,8 +38,7 @@ public class XmlParser {
 		// 当指针没有到文档结束位置的时候。
 		while (eventType != XmlPullParser.END_DOCUMENT) {
 			// 如果发现了对应的标签就返回其中内容，然后跳出。
-			if (eventType == XmlPullParser.START_TAG
-					&& tag.equalsIgnoreCase(parser.getName())) {
+			if (eventType == XmlPullParser.START_TAG && tag.equalsIgnoreCase(parser.getName())) {
 				result = parser.nextText();
 				break;
 			}
