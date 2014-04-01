@@ -1,46 +1,75 @@
 package com.mlxy.activity;
 
-import java.util.Map;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mlxy.ncweather.R;
-import com.mlxy.property.WeatherTag;
+import com.mlxy.util.DataGetter;
 import com.mlxy.xml.XmlDownloader;
-import com.mlxy.xml.XmlParser;
 
+/** 
+ * 主界面，应用目前唯一的Activity。
+ * 
+ * 1.把Fragment相关的变量名改得清楚一点。
+ * 2.两个线程的先后顺序改用线程池。
+ * 3.试试能不能把更新数据的线程用方法解决了。
+ * 4.把监听器的内容改优雅一点。
+ * 
+ * @author mlxy
+ * */
 public class MainActivity extends Activity implements OnClickListener {
+	// 处理Fragment的组件。
 	FragmentManager manager;
 	FragmentTransaction trans;
 	
-	TextView cityText;
-	TextView currentTemperatureText;
-	TextView weatherText;
-	TextView temperatureText;
-	
-	TextView fragment1;
-	TextView fragment2;
-	TextView fragment3;
-	TextView fragment4;
-	TextView fragment5;
-	
+	// 上半屏内容的字符串。
 	String cityString = "";
 	String currentTemperatureString = "";
 	String weatherString = "";
 	String temperatureString = "";
 	String updateTimeString = "";
 	
+	// 上半屏内容的控件。
+	TextView cityText;
+	TextView currentTemperatureText;
+	TextView weatherText;
+	TextView temperatureText;
+	
+	// 下半屏的选项卡。
+	TextView fragmentText1;
+	TextView fragmentText2;
+	TextView fragmentText3;
+	TextView fragmentText4;
+	TextView fragmentText5;
+	
+	// 下半屏的显示内容。
+	String content1;
+	String content2;
+	String content3;
+	String content4;
+	String content5;
+	
+	// 下半屏的几个Fragment。
+	Fragment fragment1;
+	Fragment fragment2;
+	Fragment fragment3;
+	Fragment fragment4;
+	Fragment fragment5;
+	
+	/** 句柄，用于处理UI中信息的更新。*/
 	@SuppressLint("HandlerLeak")
 	private Handler handler = new Handler() {
  		@Override
@@ -48,16 +77,42 @@ public class MainActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			
 			if (msg.what == 0x123) {
-				MainActivity.this.cityText.setText(cityString);
-				MainActivity.this.weatherText.setText(weatherString);
-				MainActivity.this.currentTemperatureText.setText(currentTemperatureString);
-				MainActivity.this.temperatureText.setText(temperatureString);
+				// 更新上半屏的天气信息。
+				cityText.setText(cityString);
+				weatherText.setText(weatherString);
+				currentTemperatureText.setText(currentTemperatureString);
+				temperatureText.setText(temperatureString);
 				
-				Toast.makeText(MainActivity.this, updateTimeString, Toast.LENGTH_LONG).show();
+				// 向下半屏的几个Fragment传递内容。
+				Bundle bundle1 = new Bundle();
+				bundle1.putString("mlxy", content1);
+				fragment1.setArguments(bundle1);
 				
+				Bundle bundle2 = new Bundle();
+				bundle2.putString("mlxy", content2);
+				fragment2.setArguments(bundle2);
+				
+				Bundle bundle3 = new Bundle();
+				bundle3.putString("mlxy", content3);
+				fragment3.setArguments(bundle3);
+				
+				Bundle bundle4 = new Bundle();
+				bundle4.putString("mlxy", content4);
+				fragment4.setArguments(bundle4);
+				
+				Bundle bundle5 = new Bundle();
+				bundle5.putString("mlxy", content5);
+				fragment5.setArguments(bundle5);
+				
+				// 显示第一个Fragment。
 				trans = manager.beginTransaction();
-				trans.replace(R.id.contentLayout, new Fragment1());
+				trans.replace(R.id.contentLayout, fragment1);
 				trans.commit();
+				
+				// 弹出提示框提示更新时间。
+				Toast toast = Toast.makeText(MainActivity.this, updateTimeString, Toast.LENGTH_LONG);
+				toast.setGravity(Gravity.BOTTOM, 0, 0);
+				toast.show();
 			}
 		}
 	};
@@ -67,13 +122,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		// 获取上半屏组件。
+		// 获取上半屏组件对象。
 		cityText = (TextView) findViewById(R.id.textCity);
 		currentTemperatureText = (TextView) findViewById(R.id.textCurrentTemperature);
 		weatherText = (TextView) findViewById(R.id.textWeather);
 		temperatureText = (TextView) findViewById(R.id.textTemperature);
 		
-		// 设置上半屏UI。
+		// 获取硬件参数，用以计算并设置上半屏UI字体。
 		DisplayMetrics dm = this.getResources().getDisplayMetrics();
 		int textSize;
 		textSize = (int) (20 * dm.density);
@@ -85,30 +140,36 @@ public class MainActivity extends Activity implements OnClickListener {
 		textSize = (int) (10 * dm.density);
 		temperatureText.setTextSize(textSize);
 		
-		// 获取下半屏组件。
-		fragment1 = (TextView) findViewById(R.id.textView1);
-		fragment2 = (TextView) findViewById(R.id.textView2);
-		fragment3 = (TextView) findViewById(R.id.textView3);
-		fragment4 = (TextView) findViewById(R.id.textView4);
-		fragment5 = (TextView) findViewById(R.id.textView5);
+		// 获取下半屏组件对象。
+		fragmentText1 = (TextView) findViewById(R.id.textView1);
+		fragmentText2 = (TextView) findViewById(R.id.textView2);
+		fragmentText3 = (TextView) findViewById(R.id.textView3);
+		fragmentText4 = (TextView) findViewById(R.id.textView4);
+		fragmentText5 = (TextView) findViewById(R.id.textView5);
+		
+		fragment1 = new Fragment1();
+		fragment2 = new Fragment2();
+		fragment3 = new Fragment3();
+		fragment4 = new Fragment4();
+		fragment5 = new Fragment5();
 		
 		manager = this.getFragmentManager();
 		
-		// 设置下半屏UI。
+		// 设置选项卡字体，挂载监听器。
 		textSize = (int) (12 * dm.density);
-		fragment1.setTextSize(textSize);
-		fragment2.setTextSize(textSize);
-		fragment3.setTextSize(textSize);
-		fragment4.setTextSize(textSize);
-		fragment5.setTextSize(textSize);
+		fragmentText1.setTextSize(textSize);
+		fragmentText2.setTextSize(textSize);
+		fragmentText3.setTextSize(textSize);
+		fragmentText4.setTextSize(textSize);
+		fragmentText5.setTextSize(textSize);
 		
-		fragment1.setOnClickListener(this);
-		fragment2.setOnClickListener(this);
-		fragment3.setOnClickListener(this);
-		fragment4.setOnClickListener(this);
-		fragment5.setOnClickListener(this);
+		fragmentText1.setOnClickListener(this);
+		fragmentText2.setOnClickListener(this);
+		fragmentText3.setOnClickListener(this);
+		fragmentText4.setOnClickListener(this);
+		fragmentText5.setOnClickListener(this);
 		
-		// 下载与更新内容。
+		// 启动两个线程，下载后更新内容。
 		Thread download = new Thread(new DownloadXml());
 		try {
 			download.start();
@@ -133,34 +194,23 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	/** 解析XML文件的线程。*/
+	/** 更新数据的线程。*/
 	class UpdateInfo implements Runnable {
 		@Override
 		public void run() {
-			// 实例化解析器并解析数据。
-			XmlParser parser = new XmlParser(MainActivity.this);
-			Map<String, String> map = null;
-			try {
-				map = parser.getContentsByTags(WeatherTag.DAY_WEATHER, 
-										 	   WeatherTag.NIGHT_WEATHER, 
-										 	   WeatherTag.DAY_TEMPERATURE,
-										 	   WeatherTag.NIGHT_TEMPERATURE,
-										 	   WeatherTag.CITY,
-										 	   WeatherTag.DAY_SENDIBLE_TEMPERATURE);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			DataGetter getter = new DataGetter(MainActivity.this);
 			
-			// 获取各个字符串。
-			cityString = map.get(WeatherTag.CITY);
-			currentTemperatureString = map.get(WeatherTag.DAY_SENDIBLE_TEMPERATURE) + "℃";
-			temperatureString = map.get(WeatherTag.NIGHT_TEMPERATURE) + "-" + map.get(WeatherTag.DAY_TEMPERATURE) + "℃";
-			if (map.get(WeatherTag.DAY_WEATHER).equals(map.get(WeatherTag.NIGHT_WEATHER))) {
-				weatherString = map.get(WeatherTag.DAY_WEATHER);
-			} else {
-				weatherString = map.get(WeatherTag.DAY_WEATHER) + "转" + map.get(WeatherTag.NIGHT_WEATHER);
-			}
-			updateTimeString = parser.getUpdateTime();
+			cityString = getter.getCity();
+			currentTemperatureString = getter.getCurrentTemperature();
+			weatherString = getter.getWeather();
+			temperatureString = getter.getWholeDayTemperature();
+			updateTimeString = getter.getUpdateTime();
+			
+			content1 = getter.getSendibleTemperatureContent();
+			content2 = getter.getPollutionContent();
+			content3 = getter.getDressingContent();
+			content4 = getter.getColdContent();
+			content5 = getter.getExerciseDescrContent();
 			
 			handler.sendEmptyMessage(0x123);
 		}
@@ -172,22 +222,67 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		switch (v.getId()) {
 		case R.id.textView1:
-			trans.replace(R.id.contentLayout, new Fragment1());
+			trans.replace(R.id.contentLayout, fragment1);
+			colorSetSelected(fragmentText1);
+			colorSetUnselected(fragmentText2);
+			colorSetUnselected(fragmentText3);
+			colorSetUnselected(fragmentText4);
+			colorSetUnselected(fragmentText5);
 			break;
 		case R.id.textView2:
-			trans.replace(R.id.contentLayout, new Fragment2());
+			trans.replace(R.id.contentLayout, fragment2);
+			colorSetSelected(fragmentText2);
+			colorSetUnselected(fragmentText1);
+			colorSetUnselected(fragmentText3);
+			colorSetUnselected(fragmentText4);
+			colorSetUnselected(fragmentText5);
 			break;
 		case R.id.textView3:
-			trans.replace(R.id.contentLayout, new Fragment3());
+			trans.replace(R.id.contentLayout, fragment3);
+			colorSetSelected(fragmentText3);
+			colorSetUnselected(fragmentText2);
+			colorSetUnselected(fragmentText1);
+			colorSetUnselected(fragmentText4);
+			colorSetUnselected(fragmentText5);
 			break;
 		case R.id.textView4:
-			trans.replace(R.id.contentLayout, new Fragment4());
+			trans.replace(R.id.contentLayout, fragment4);
+			colorSetSelected(fragmentText4);
+			colorSetUnselected(fragmentText2);
+			colorSetUnselected(fragmentText3);
+			colorSetUnselected(fragmentText1);
+			colorSetUnselected(fragmentText5);
 			break;
 		case R.id.textView5:
-			trans.replace(R.id.contentLayout, new Fragment5());
+			trans.replace(R.id.contentLayout, fragment5);
+			colorSetSelected(fragmentText5);
+			colorSetUnselected(fragmentText2);
+			colorSetUnselected(fragmentText3);
+			colorSetUnselected(fragmentText4);
+			colorSetUnselected(fragmentText1);
 			break;
 		}
 		
 		trans.commit();
+	}
+	
+	/** 
+	 * 将文本颜色及背景颜色设置为已被选择的状态。
+	 * 
+	 * @param v TextView
+	 */
+	private void colorSetSelected(TextView v) {
+		v.setTextColor(Color.BLACK);
+		v.setBackgroundColor(Color.WHITE);
+	}
+	
+	/** 
+	 * 将文本颜色及背景颜色设置为未被选择的状态。
+	 * 
+	 * @param v TextView
+	 */
+	private void colorSetUnselected(TextView v) {
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.BLACK);
 	}
 }

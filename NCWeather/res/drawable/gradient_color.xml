@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- start:  天蓝色 -->
+    <!-- center: 亮蓝色 -->
+    <!-- end:    亮天蓝色 -->
+    
+    <gradient
+        android:angle="90"
+        android:startColor="#F0FFFF"
+        android:centerColor="#ADD8E6"
+        android:endColor="#87CEFA" />
+
+</shape>

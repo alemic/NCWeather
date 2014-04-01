@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">NCWeather</string>
-    <string name="action_settings">Settings</string>
     <string name="image_description">天气图标</string>
     <string name="city">地点不明</string>
     <string name="weather">天气未知</string>

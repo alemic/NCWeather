@@ -55,8 +55,7 @@ public class XmlParser {
 	/**
 	 * 根据给定的标签列表将对应的内容依次填入Map中并返回。
 	 * 
-	 * @param list
-	 *            标签列表
+	 * @param list 标签列表
 	 * @return map 标签与内容一一对应的映射。
 	 */
 	public Map<String, String> getContentsByTags(String... tags)
