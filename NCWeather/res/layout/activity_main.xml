@@ -65,7 +65,7 @@
             android:layout_weight="1"
             android:contentDescription="@string/image_description"
             android:scaleType="fitStart"
-            android:src="@drawable/we" />
+            android:src="@drawable/undefined" />
     </LinearLayout>
 
     <LinearLayout

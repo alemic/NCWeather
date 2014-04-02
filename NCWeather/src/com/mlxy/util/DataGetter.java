@@ -1,25 +1,36 @@
 package com.mlxy.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Map;
 
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import com.mlxy.property.WeatherImages;
 import com.mlxy.property.WeatherTag;
 import com.mlxy.xml.XmlParser;
 
 public class DataGetter {
+	private Context parent;
 	private XmlParser parser;
 	private Map<String, String> map;
 	
 	/** 构造函数，初始化两个类变量，之后获取所有需要的数据并储存。*/
 	public DataGetter(Context parent) {
+		this.parent = parent;
 		this.parser = new XmlParser(parent);
 		this.map = null;
 				
 		try {
 			map = parser.getContentsByTags(WeatherTag.DAY_WEATHER, 
 									 	   WeatherTag.NIGHT_WEATHER, 
+									 	   WeatherTag.DAY_WEATHER_PINYIN,
+									 	   WeatherTag.NIGHT_WEATHER_PINYIN,
+									 	   
 									 	   WeatherTag.DAY_TEMPERATURE,
 									 	   WeatherTag.NIGHT_TEMPERATURE,
 									 	   WeatherTag.CITY,
@@ -174,5 +185,42 @@ public class DataGetter {
 		String timeString = parser.getUpdateTime();
 		
 		return timeString;
+	}
+	
+	/** 获取根据系统时间返回白天或夜晚的天气图片。*/
+	public Bitmap getWeatherImage() {
+		// 获取当前小时，24小时制。
+		Calendar c = Calendar.getInstance();
+		int hour = c.get(Calendar.HOUR_OF_DAY);
+		
+		// 根据时间获取文件夹名称。根据时间获取天气，用天气获取对应图片的文件名。
+		String dayOrNight = null;
+		String fileName = null;
+		
+		if (hour <= 6 || hour >= 18) {
+			dayOrNight = "night";
+			String weatherPinyin = map.get(WeatherTag.NIGHT_WEATHER_PINYIN);
+			fileName = WeatherImages.getFileName(weatherPinyin);
+		} else {
+			dayOrNight = "day";
+			String weatherPinyin = map.get(WeatherTag.DAY_WEATHER_PINYIN);
+			fileName = WeatherImages.getFileName(weatherPinyin);
+		}
+		
+		// 获取资源包。
+		AssetManager manager = this.parent.getResources().getAssets();
+		
+		// 用已经得到的变量获取对应图片对象。
+		Bitmap image = null;
+		
+		try {
+			InputStream in = manager.open("weather/" + dayOrNight+ "/" + fileName);
+			image = BitmapFactory.decodeStream(in);
+			in.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+		return image;
 	}
 }

@@ -1,10 +1,10 @@
 package com.mlxy.activity;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +13,7 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,18 +36,20 @@ public class MainActivity extends Activity implements OnClickListener {
 	FragmentManager manager;
 	FragmentTransaction trans;
 	
-	// 上半屏内容的字符串。
+	// 上半屏内容的数据。
 	String cityString = "";
 	String currentTemperatureString = "";
 	String weatherString = "";
 	String temperatureString = "";
 	String updateTimeString = "";
+	Bitmap weatherImage;
 	
 	// 上半屏内容的控件。
 	TextView cityText;
 	TextView currentTemperatureText;
 	TextView weatherText;
 	TextView temperatureText;
+	ImageView weatherImageView;
 	
 	// 下半屏的选项卡。
 	TextView fragmentText1;
@@ -55,7 +58,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	TextView fragmentText4;
 	TextView fragmentText5;
 	
-	// 下半屏的显示内容。
+	// 下半屏的具体说明内容。
 	String content1;
 	String content2;
 	String content3;
@@ -69,19 +72,18 @@ public class MainActivity extends Activity implements OnClickListener {
 	Fragment fragment4;
 	Fragment fragment5;
 	
-	/** 句柄，用于处理UI中信息的更新。*/
-	@SuppressLint("HandlerLeak")
-	private Handler handler = new Handler() {
- 		@Override
-		public void handleMessage(Message msg) {
-			super.handleMessage(msg);
-			
+	/** 处理器，用于将信息更新到UI中。*/
+	private Handler handler = new Handler(new Handler.Callback() {
+		@Override
+		public boolean handleMessage(Message msg) {
 			if (msg.what == 0x123) {
 				// 更新上半屏的天气信息。
 				cityText.setText(cityString);
 				weatherText.setText(weatherString);
 				currentTemperatureText.setText(currentTemperatureString);
 				temperatureText.setText(temperatureString);
+				
+				weatherImageView.setImageBitmap(weatherImage);
 				
 				// 向下半屏的几个Fragment传递内容。
 				Bundle bundle1 = new Bundle();
@@ -113,9 +115,13 @@ public class MainActivity extends Activity implements OnClickListener {
 				Toast toast = Toast.makeText(MainActivity.this, updateTimeString, Toast.LENGTH_LONG);
 				toast.setGravity(Gravity.BOTTOM, 0, 0);
 				toast.show();
+				
+				return true;
 			}
+			
+			return false;
 		}
-	};
+	});
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +133,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		currentTemperatureText = (TextView) findViewById(R.id.textCurrentTemperature);
 		weatherText = (TextView) findViewById(R.id.textWeather);
 		temperatureText = (TextView) findViewById(R.id.textTemperature);
+		
+		weatherImageView = (ImageView) findViewById(R.id.imageView1);
 		
 		// 获取硬件参数，用以计算并设置上半屏UI字体。
 		DisplayMetrics dm = this.getResources().getDisplayMetrics();
@@ -205,6 +213,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			weatherString = getter.getWeather();
 			temperatureString = getter.getWholeDayTemperature();
 			updateTimeString = getter.getUpdateTime();
+			
+			weatherImage = getter.getWeatherImage();
 			
 			content1 = getter.getSendibleTemperatureContent();
 			content2 = getter.getPollutionContent();
