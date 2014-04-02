@@ -24,11 +24,6 @@ import com.mlxy.xml.XmlDownloader;
 /** 
  * 主界面，应用目前唯一的Activity。
  * 
- * 1.把Fragment相关的变量名改得清楚一点。
- * 2.两个线程的先后顺序改用线程池。
- * 3.试试能不能把更新数据的线程用方法解决了。
- * 4.把监听器的内容改优雅一点。
- * 
  * @author mlxy
  * */
 public class MainActivity extends Activity implements OnClickListener {
@@ -186,7 +181,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			e.printStackTrace();
 		};
 		
-		new Thread(new UpdateInfo()).start();
+		this.updateInfo();
 	}
 	
 	/** 下载XML文件的线程。*/
@@ -202,28 +197,25 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	/** 更新数据的线程。*/
-	class UpdateInfo implements Runnable {
-		@Override
-		public void run() {
-			DataGetter getter = new DataGetter(MainActivity.this);
-			
-			cityString = getter.getCity();
-			currentTemperatureString = getter.getCurrentTemperature();
-			weatherString = getter.getWeather();
-			temperatureString = getter.getWholeDayTemperature();
-			updateTimeString = getter.getUpdateTime();
-			
-			weatherImage = getter.getWeatherImage();
-			
-			content1 = getter.getSendibleTemperatureContent();
-			content2 = getter.getPollutionContent();
-			content3 = getter.getDressingContent();
-			content4 = getter.getColdContent();
-			content5 = getter.getExerciseDescrContent();
-			
-			handler.sendEmptyMessage(0x123);
-		}
+	/** 获取UI中所需的数据并给相应的变量赋值。*/
+	private void updateInfo() {
+		DataGetter getter = new DataGetter(MainActivity.this);
+		
+		cityString = getter.getCity();
+		currentTemperatureString = getter.getCurrentTemperature();
+		weatherString = getter.getWeather();
+		temperatureString = getter.getWholeDayTemperature();
+		updateTimeString = getter.getUpdateTime();
+		
+		weatherImage = getter.getWeatherImage();
+		
+		content1 = getter.getSendibleTemperatureContent();
+		content2 = getter.getPollutionContent();
+		content3 = getter.getDressingContent();
+		content4 = getter.getColdContent();
+		content5 = getter.getExerciseDescrContent();
+		
+		handler.sendEmptyMessage(0x123);
 	}
 
 	@Override

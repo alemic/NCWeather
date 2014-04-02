@@ -1,6 +1,7 @@
 package com.mlxy.activity;
 
 import android.app.Fragment;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ public class Fragment4 extends Fragment {
 		
 		textView.setTextSize(textSize);
 		textView.setText(text);
+		textView.setBackgroundColor(Color.WHITE);
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

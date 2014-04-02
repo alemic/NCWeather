@@ -6,9 +6,6 @@ import java.util.Map;
 
 public class WeatherImages {
 	private static Map<String, String> map  = new HashMap<String, String>() {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = -8552791002402932770L;
 
 		{

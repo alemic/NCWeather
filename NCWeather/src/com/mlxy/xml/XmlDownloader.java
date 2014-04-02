@@ -24,12 +24,9 @@ import com.mlxy.util.CharacterProcesser;
 public class XmlDownloader {
 	private Context parent;
 	
-	private String cityName = "南昌";
-	private String city = CharacterProcesser.encodeByGB2312(cityName);
+	private String city = "南昌";
 	private String password = "DJOYnieT8234jlsK";
 	private int day = 0;
-	private String link = "http://php.weather.sina.com.cn/xml.php?city=" + city
-			+ "&password=" + password + "&day=" + day;
 	
 	/** 私有构造方法，避免被外部实例化。*/
 	private XmlDownloader() {
@@ -95,8 +92,8 @@ public class XmlDownloader {
 		this.parent = parent;
 	}
 	
-	private void setCity(String cityName) {
-		this.cityName = cityName;
+	private void setCity(String city) {
+		this.city = city;
 	}
 	
 	private void setPassword(String password) {
@@ -107,8 +104,15 @@ public class XmlDownloader {
 		this.day = day;
 	}
 	
+	private String getCityEncode() {
+		return CharacterProcesser.encodeByGB2312(city);
+	}
+	
 	private String getLink() {
-		return this.link;
+		String link = "http://php.weather.sina.com.cn/xml.php?city=" + getCityEncode()
+				+ "&password=" + password + "&day=" + day;
+		
+		return link;
 	}
 	
 	public static class Builder {
@@ -126,8 +130,8 @@ public class XmlDownloader {
 		 * @param cityName 城市名
 		 * @return 构造器本身
 		 */
-		public Builder setCity(String cityName) {
-			instance.setCity(cityName);
+		public Builder setCity(String city) {
+			instance.setCity(city);
 			return this;
 		}
 		
