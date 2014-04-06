@@ -75,6 +75,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				// 更新上半屏的天气信息。
 				cityText.setText(cityString);
 				weatherText.setText(weatherString);
+				weatherText.setHorizontallyScrolling(true);
 				currentTemperatureText.setText(currentTemperatureString);
 				temperatureText.setText(temperatureString);
 				

@@ -46,6 +46,9 @@
                 android:layout_alignParentLeft="true"
                 android:layout_below="@+id/textCurrentTemperature"
                 android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:lines="1"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:text="@string/weather" />
 
