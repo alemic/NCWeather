@@ -4,6 +4,11 @@ NCWeather
 基于新浪API的安卓南昌天气应用。
 天气图标来源于中国天气网。
 
+
+    爷诈尸了，下面的文字部分作废。
+    界面有微小变动，不过暂时以下面那张图为准没有问题。
+    ——2014.4.23 mlxy
+
 ###停止更新说明
     截至停止更新时只支持南昌一个城市，但是可以通过直接修改代码来支持其他城市。
     代码在MainActivity类中的DownloadXml类中（#193）。
@@ -18,6 +23,5 @@ NCWeather
 
 ###界面是这个样子的：
 ![NCWeather](http://ww4.sinaimg.cn/large/69209b85gw1ef4sf1508pj208c0dcaao.jpg "NCWeather")
-
 
 
