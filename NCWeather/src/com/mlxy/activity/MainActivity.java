@@ -1,18 +1,25 @@
 package com.mlxy.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +34,8 @@ import com.mlxy.xml.XmlDownloader;
  * @author mlxy
  * */
 public class MainActivity extends Activity implements OnClickListener {
+	// 城市。
+	String city;
 	// 处理Fragment的组件。
 	FragmentManager manager;
 	FragmentTransaction trans;
@@ -53,7 +62,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	TextView fragmentText4;
 	TextView fragmentText5;
 	
-	// 下半屏的具体说明内容。
+	// 下半屏的具体说明内容数据。
 	String content1;
 	String content2;
 	String content3;
@@ -124,6 +133,11 @@ public class MainActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		// 获取保存的所在城市，没有则使用默认城市南昌。
+		SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
+		this.city = pref.getString("city", "南昌");
+		Log.v("mlxy", "调用了开始方法。"+this.city);
+		
 		// 获取上半屏组件对象。
 		cityText = (TextView) findViewById(R.id.textCity);
 		currentTemperatureText = (TextView) findViewById(R.id.textCurrentTemperature);
@@ -132,10 +146,17 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		weatherImageView = (ImageView) findViewById(R.id.imageView1);
 		
+		// 给城市文本绑定点击监听器。
+		cityText.setOnClickListener(this);
+		
+//		// 给城市文本设置下划线。
+//		cityText.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
+//		cityText.getPaint().setAntiAlias(true);
+		
 		// 获取硬件参数，用以计算并设置上半屏UI字体。
 		DisplayMetrics dm = this.getResources().getDisplayMetrics();
 		int textSize;
-		textSize = (int) (20 * dm.density);
+		textSize = (int) (18 * dm.density);
 		cityText.setTextSize(textSize);
 		textSize = (int) (30 * dm.density);
 		currentTemperatureText.setTextSize(textSize);
@@ -173,16 +194,21 @@ public class MainActivity extends Activity implements OnClickListener {
 		fragmentText4.setOnClickListener(this);
 		fragmentText5.setOnClickListener(this);
 		
-		// 启动两个线程，下载后更新内容。
-		Thread download = new Thread(new DownloadXml());
-		try {
-			download.start();
-			download.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		};
-		
-		this.updateInfo();
+		this.downloadAndUpdate();
+	}
+	
+	/** 下载xml之后更新信息并调用处理器更新窗口内容。*/
+	private void downloadAndUpdate() {
+		// 启动阻塞式的下载线程，然后更新内容。
+				Thread download = new Thread(new DownloadXml());
+				try {
+					download.start();
+					download.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				};
+				
+				this.updateInfo();
 	}
 	
 	/** 下载XML文件的线程。*/
@@ -191,14 +217,14 @@ public class MainActivity extends Activity implements OnClickListener {
 		public void run() {
 			// 构建Xml下载器并下载Xml文件。
 			new XmlDownloader.Builder(MainActivity.this)
-					.setCity("南昌")
+					.setCity(MainActivity.this.city)
 					.setPassword("DJOYnieT8234jlsK")
 					.setDay(0)
 					.download();
 		}
 	}
 	
-	/** 获取UI中所需的数据并给相应的变量赋值。*/
+	/** 获取UI中所需的数据并赋值到类变量中。*/
 	private void updateInfo() {
 		DataGetter getter = new DataGetter(MainActivity.this);
 		
@@ -224,6 +250,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		trans = manager.beginTransaction();
 		
 		switch (v.getId()) {
+		// 选项卡的点击事件。
 		case R.id.textView1:
 			trans.replace(R.id.contentLayout, fragment1);
 			colorSetSelected(fragmentText1);
@@ -264,6 +291,25 @@ public class MainActivity extends Activity implements OnClickListener {
 			colorSetUnselected(fragmentText4);
 			colorSetUnselected(fragmentText1);
 			break;
+			
+		// 城市的点击事件。
+		case R.id.textCity:
+			final EditText dialogText = new EditText(this);
+			
+			new AlertDialog.Builder(this)
+				.setTitle("请输入城市名")
+				.setMessage("千万得是个真实存在的城市名啊作者给你跪下了不然程序就再也打不开了")
+				.setIcon(android.R.drawable.ic_dialog_email)
+				.setView(dialogText)
+				.setPositiveButton("更新并重启", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						MainActivity.this.city = dialogText.getText().toString();
+						MainActivity.this.restartApplication();
+					}
+				})
+				.setNegativeButton("取消", null)
+				.show();
 		}
 		
 		trans.commit();
@@ -287,5 +333,28 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void colorSetUnselected(TextView v) {
 		v.setTextColor(Color.WHITE);
 		v.setBackgroundColor(Color.BLACK);
+	}
+	
+	/** 重启应用。*/
+	private void restartApplication() {
+        Intent intent = new Intent();
+        intent.setClass(this, MainActivity.class);
+        Log.v("mlxy", "我要finish啦");
+        this.finish();
+        Log.v("mlxy", "我要startActivity啦");
+        this.startActivity(intent);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
+		Editor editor = pref.edit();
+		
+		editor.putString("city", this.city);
+		editor.commit();
+		
+		Log.v("mlxy", "调用了停止方法。"+this.city);
 	}
 }
