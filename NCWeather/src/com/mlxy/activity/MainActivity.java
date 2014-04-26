@@ -1,11 +1,9 @@
 package com.mlxy.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -15,11 +13,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -136,7 +132,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 获取保存的所在城市，没有则使用默认城市南昌。
 		SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
 		this.city = pref.getString("city", "南昌");
-		Log.v("mlxy", "调用了开始方法。"+this.city);
 		
 		// 获取上半屏组件对象。
 		cityText = (TextView) findViewById(R.id.textCity);
@@ -148,10 +143,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		// 给城市文本绑定点击监听器。
 		cityText.setOnClickListener(this);
-		
-//		// 给城市文本设置下划线。
-//		cityText.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
-//		cityText.getPaint().setAntiAlias(true);
 		
 		// 获取硬件参数，用以计算并设置上半屏UI字体。
 		DisplayMetrics dm = this.getResources().getDisplayMetrics();
@@ -294,22 +285,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			
 		// 城市的点击事件。
 		case R.id.textCity:
-			final EditText dialogText = new EditText(this);
-			
-			new AlertDialog.Builder(this)
-				.setTitle("请输入城市名")
-				.setMessage("千万得是个真实存在的城市名啊作者给你跪下了不然程序就再也打不开了")
-				.setIcon(android.R.drawable.ic_dialog_email)
-				.setView(dialogText)
-				.setPositiveButton("更新并重启", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						MainActivity.this.city = dialogText.getText().toString();
-						MainActivity.this.restartApplication();
-					}
-				})
-				.setNegativeButton("取消", null)
-				.show();
+			// 启动省份选择列表并等待返回值。
+			Intent intent = new Intent();
+			intent.setClass(this, ProvinceListActivity.class);
+			this.startActivityForResult(intent, 2);
 		}
 		
 		trans.commit();
@@ -335,16 +314,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		v.setBackgroundColor(Color.BLACK);
 	}
 	
-	/** 重启应用。*/
-	private void restartApplication() {
-        Intent intent = new Intent();
-        intent.setClass(this, MainActivity.class);
-        Log.v("mlxy", "我要finish啦");
-        this.finish();
-        Log.v("mlxy", "我要startActivity啦");
-        this.startActivity(intent);
-	}
-	
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -354,7 +323,34 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		editor.putString("city", this.city);
 		editor.commit();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data == null) {
+			return;
+		}
 		
-		Log.v("mlxy", "调用了停止方法。"+this.city);
+		// 获取传下来的城市名保存到类变量中。
+		String cityName = data.getStringExtra("city");
+		this.city = cityName;
+		
+		// 保存pref信息。
+		SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
+		Editor editor = pref.edit();
+		editor.putString("city", this.city);
+		editor.commit();
+		
+		// 重启应用。
+		this.restartApplication();
+	}
+	
+	/** 重启应用。*/
+	private void restartApplication() {
+	        Intent intent = new Intent();
+	        intent.setClass(this, MainActivity.class);
+	        
+	        this.finish();
+	        this.startActivity(intent);
 	}
 }

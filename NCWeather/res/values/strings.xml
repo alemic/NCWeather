@@ -12,5 +12,9 @@
     <string name="fragment3">穿衣</string>
     <string name="fragment4">感冒</string>
     <string name="fragment5">运动</string>
+    <string name="title_activity_province_list">ProvinceListActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_city_list">CityListActivity</string>
 
 </resources>
