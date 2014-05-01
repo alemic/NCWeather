@@ -13,6 +13,10 @@ import android.widget.ListView;
 
 import com.mlxy.ncweather.R;
 
+/** 城市列表。
+ * 
+ * @author mlxy
+ * */
 public class CityListActivity extends Activity {
 	private ListView cityListView;
 
@@ -54,7 +58,7 @@ public class CityListActivity extends Activity {
 	}
 
 	/** 根据传入的省份向列表里添加城市。 */
-	private ArrayList<String> loadCity(String province) {
+	private void loadCity(String province) {
 
 		if (province.equals("安徽")) {
 			cityList.add("合肥");
@@ -425,7 +429,5 @@ public class CityListActivity extends Activity {
 			cityList.add("台州");
 			cityList.add("丽水");
 		}
-
-			return this.cityList;
 	}
 }

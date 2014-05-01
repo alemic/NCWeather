@@ -32,6 +32,7 @@ import com.mlxy.xml.XmlDownloader;
 public class MainActivity extends Activity implements OnClickListener {
 	// 城市。
 	String city;
+	
 	// 处理Fragment的组件。
 	FragmentManager manager;
 	FragmentTransaction trans;
@@ -123,7 +124,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			return false;
 		}
 	});
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
