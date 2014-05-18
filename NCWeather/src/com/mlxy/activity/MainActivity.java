@@ -1,6 +1,7 @@
 package com.mlxy.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -9,6 +10,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -130,6 +133,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		//检查网络连接。
+		this.checkConnection();
+		
 		// 获取保存的所在城市，没有则使用默认城市南昌。
 		SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
 		this.city = pref.getString("city", "南昌");
@@ -192,15 +198,15 @@ public class MainActivity extends Activity implements OnClickListener {
 	/** 下载xml之后更新信息并调用处理器更新窗口内容。*/
 	private void downloadAndUpdate() {
 		// 启动阻塞式的下载线程，然后更新内容。
-				Thread download = new Thread(new DownloadXml());
-				try {
-					download.start();
-					download.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				};
-				
-				this.updateInfo();
+		Thread download = new Thread(new DownloadXml());
+		try {
+			download.start();
+			download.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		};
+		
+		this.updateInfo();
 	}
 	
 	/** 下载XML文件的线程。*/
@@ -353,5 +359,33 @@ public class MainActivity extends Activity implements OnClickListener {
 	        
 	        this.finish();
 	        this.startActivity(intent);
+	}
+	
+	/** 检查网络连接，未连接的话弹出对话框提示。*/
+	private void checkConnection() {
+		if (this.isOnline()) {
+			return;
+		} else {
+			new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("网络未连接")
+				.setMessage("当前网络不可用，将使用最后一次联网更新的天气信息。")
+				.setPositiveButton("确定", null)
+				.show();
+		}
+	}
+	
+	/** 检查网络连接。*/
+	private boolean isOnline() {
+		// 获取连接管理器。
+		ConnectivityManager cm = (ConnectivityManager) this.getSystemService(CONNECTIVITY_SERVICE);
+		
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		
+		// 返回网络状态。
+		if (info != null) {
+			return info.isAvailable();
+		}
+		return false;
 	}
 }
