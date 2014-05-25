@@ -28,7 +28,7 @@ import com.mlxy.util.DataGetter;
 import com.mlxy.xml.XmlDownloader;
 
 /** 
- * 主界面，应用目前唯一的Activity。
+ * 主界面。
  * 
  * @author mlxy
  * */

@@ -28,6 +28,8 @@ public class ProvinceListActivity extends Activity {
 	/** 适配器，准备塞入列表视图里。*/
 	private ArrayAdapter<String> provinceAdapter;
 	
+	/** 直辖市在列表里的下标。*/
+	private int[] municipalityIndex = {2,3,4,25,29,30};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,21 +51,27 @@ public class ProvinceListActivity extends Activity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				// 如果是直辖市。
-				if (position == 1 || position == 2 || position == 3 || position == 24 || position == 28 || position == 29) {
-					// 直接包装好传回上一级。
-					Intent intent = new Intent();
-					intent.putExtra("city", provinceList.get(position));
-					
-					setResult(2, intent);
-					finish();
-					return;
+				for (int i = 0; i < municipalityIndex.length; i++) {
+					// 如果是直辖市。
+					if (position == municipalityIndex[i]) {
+						// 直接包装好传回上一级。
+						Intent intent = new Intent();
+						intent.putExtra("city", provinceList.get(position));
+						
+						setResult(2, intent);
+						finish();
+						return;
+					}
 				}
 				
 				// 包装好选择的省份，启动城市列表并等待返回值。
 				Intent intent = new Intent();
 				intent.putExtra("province", provinceList.get(position));
-				intent.setClass(ProvinceListActivity.this, CityListActivity.class);
+				if (position == 0) {
+					intent.setClass(ProvinceListActivity.this, MyFavoriteActivity.class);
+				} else {
+					intent.setClass(ProvinceListActivity.this, CityListActivity.class);
+				}
 				
 				startActivityForResult(intent, 1);
 			}
@@ -72,6 +80,7 @@ public class ProvinceListActivity extends Activity {
 	
 	/** 向列表里添加各省份，按拼音排序。*/
 	private void loadProvince() {
+		provinceList.add("常用");
 		provinceList.add("安徽");
 		provinceList.add("澳门");
 		provinceList.add("北京");
